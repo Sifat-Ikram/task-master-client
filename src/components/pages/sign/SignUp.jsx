@@ -3,12 +3,12 @@ import img from "../../../assets/others/authentication.gif";
 import { useForm } from "react-hook-form";
 import { updateProfile } from "firebase/auth";
 import axios from "axios";
-import useAxiosPublic from "../../hooks/useAxiosPublic";
 import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { AuthContext } from "../../provider/AuthProvider";
 
-const image_hosting_key = import.meta.env.VITE_image_hosting_key;
+const image_hosting_key = import.meta.env.VITE_IMAGE_HOSTING_KEY;
 const image_hosting_api = `https://api.imgbb.com/1/upload?key=${image_hosting_key}`;
 const SignUp = () => {
   const axiosPublic = useAxiosPublic();
@@ -43,7 +43,7 @@ const SignUp = () => {
         .then((res) => {
           updateProfile(res.user, {
             displayName: data.name,
-            photoUrl: resImage.data.data.display_url,
+            photoURL: resImage.data.data.display_url,
           })
             .then(() => {
               console.log("Profile updated");

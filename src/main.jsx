@@ -11,6 +11,8 @@ import SignUp from './components/pages/sign/SignUp.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AuthProvider from './components/provider/AuthProvider.jsx';
 import HomePage from './components/pages/home/HomePage.jsx';
+import Dashboard from './components/pages/dashboard/Dashboard.jsx';
+import AddTask from './components/pages/add_task/AddTask.jsx';
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
       {
         path: "/signUp",
         element: <SignUp />
+      },
+      {
+        path: "/dashboard",
+        element: <Dashboard />
+      },
+      {
+        path: "/addTask",
+        element: <AddTask />
       }
     ]
   },

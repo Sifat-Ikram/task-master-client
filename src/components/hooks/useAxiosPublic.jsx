@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosPublic = axios.create({
-    baseURL: 'https://taste-trail-server.vercel.app'
+    baseURL: 'http://localhost:4321'
 })
 
 const useAxiosPublic = () => {
