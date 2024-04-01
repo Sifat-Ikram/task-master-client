@@ -157,7 +157,7 @@ const HomePage = () => {
                       className="btn btn-outline btn-primary"
                       onClick={() => handleBook(task)}
                     >
-                      Book this task
+                      Add this task to to do list
                     </button>
                   </div>
                 </div>

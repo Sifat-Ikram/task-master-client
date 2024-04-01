@@ -10,11 +10,13 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
+import useAxiosPublic from "../hooks/useAxiosPublic";
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const AuthContext = createContext(null);
 const AuthProvider = ({ children }) => {
+  const axiosPublic = useAxiosPublic();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +51,24 @@ const AuthProvider = ({ children }) => {
     const unSubscribe = onAuthStateChanged(auth, (observer) => {
       console.log("Watcher", observer);
       setUser(observer);
+      if (observer) {
+        const userInfo = { email: observer.email };
+        axiosPublic
+          .post("/jwt", userInfo, { withCredentials: true })
+          .then((res) => {
+            if (res.data.token) {
+              localStorage.setItem("access-token", res.data.token);
+              setLoading(false);
+            } else {
+              localStorage.removeItem("access-token");
+              setLoading(false);
+            }
+          })
+          .catch((error) => {
+            console.error("Error occurred during /jwt request:", error);
+            setLoading(false); // Make sure to set loading state to false in case of error
+          });
+      }
     });
     return () => {
       unSubscribe();
@@ -65,7 +85,9 @@ const AuthProvider = ({ children }) => {
     updateUserProfile,
   };
 
-  return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+  );
 };
 
 export default AuthProvider;

@@ -15,6 +15,10 @@ const Dashboard = () => {
   const [running, refetchRunning] = useRunning();
   const [completed, refetchCompleted] = useCompleted();
 
+  if (!user) {
+    return <h1>Loading...</h1>;
+  }
+
   const handlePendingDelete = (item) => {
     Swal.fire({
       title: "Are you sure?",
@@ -26,17 +30,14 @@ const Dashboard = () => {
       confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
-        axiosPublic.delete(`/bookings/${item._id}`).then((res) => {
-          console.log(res.data);
+        axiosPublic.delete(`/bookings/${item._id}`).then(() => {
           refetchBooking();
-          if (res.data.result.deletedCount > 0) {
-            Swal.fire({
-              position: "top-right",
-              title: "Deleted!",
-              text: "This task is deleted",
-              icon: "success",
-            });
-          }
+          Swal.fire({
+            position: "top-right",
+            title: "Deleted!",
+            text: "This task is deleted",
+            icon: "success",
+          });
         });
       }
     });
@@ -50,10 +51,11 @@ const Dashboard = () => {
       description: task.description,
     };
 
-    axiosPublic.post("/running", runningTask).then((res) => {
-      if (res.data.insertedId) {
+    axiosPublic.post("/running", runningTask).then(() => {
+      axiosPublic.delete(`/bookings/${task._id}`).then(() => {
         refetchBooking();
-      }
+        refetchRunning();
+      });
     });
   };
 
@@ -68,17 +70,14 @@ const Dashboard = () => {
       confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
-        axiosPublic.delete(`/running/${item._id}`).then((res) => {
-          console.log(res.data);
+        axiosPublic.delete(`/running/${item._id}`).then(() => {
           refetchRunning();
-          if (res.data.result.deletedCount > 0) {
-            Swal.fire({
-              position: "top-right",
-              title: "Deleted!",
-              text: "This task is deleted",
-              icon: "success",
-            });
-          }
+          Swal.fire({
+            position: "top-right",
+            title: "Deleted!",
+            text: "This task is deleted",
+            icon: "success",
+          });
         });
       }
     });
@@ -92,13 +91,14 @@ const Dashboard = () => {
       description: task.description,
     };
 
-    axiosPublic.post("/completed", completedTask).then((res) => {
-      if (res.data.insertedId) {
+    axiosPublic.post("/completed", completedTask).then(() => {
+      axiosPublic.delete(`/running/${task._id}`).then(() => {
         refetchRunning();
-      }
+        refetchCompleted();
+      });
     });
   };
-  
+
   const handleCompletedDelete = (item) => {
     Swal.fire({
       title: "Are you sure?",
@@ -110,25 +110,22 @@ const Dashboard = () => {
       confirmButtonText: "Yes",
     }).then((result) => {
       if (result.isConfirmed) {
-        axiosPublic.delete(`/completed/${item._id}`).then((res) => {
-          console.log(res.data);
+        axiosPublic.delete(`/completed/${item._id}`).then(() => {
           refetchCompleted();
-          if (res.data.result.deletedCount > 0) {
-            Swal.fire({
-              position: "top-right",
-              title: "Deleted!",
-              text: "This task is deleted",
-              icon: "success",
-            });
-          }
+          Swal.fire({
+            position: "top-right",
+            title: "Deleted!",
+            text: "This task is deleted",
+            icon: "success",
+          });
         });
       }
     });
   };
 
   return (
-    <div className="lg:flex justify-center items-center ml-3">
-      <div className="w-3/4 mx-auto mt-28 min-h-screen">
+    <div className="lg:flex justify-center max-md:items-center ml-3">
+      <div className="w-3/4 mx-auto mt-28">
         <h1 className="text-4xl font-semibold text-center mb-8 text-primary">
           Manage your tasks
         </h1>
@@ -138,24 +135,28 @@ const Dashboard = () => {
               To Do
             </h2>
             <div className="p-4">
-              {booking.map((task) => (
-                <div
-                  key={task._id}
-                  className="flex items-center justify-between border-b border-gray-300 py-2"
-                >
-                  <p className="text-lg">{task.taskName}</p>
-                  <div className="flex items-center gap-4">
-                    <MdDelete
-                      onClick={() => handlePendingDelete(task)}
-                      className="text-red-700 cursor-pointer"
-                    />
-                    <FaArrowRight
-                      onClick={() => handleToRunning(task)}
-                      className="text-blue-700 cursor-pointer"
-                    />
+              {booking.length ? (
+                booking.map((task) => (
+                  <div
+                    key={task._id}
+                    className="flex items-center justify-between border-b border-gray-300 py-2"
+                  >
+                    <p className="text-lg">{task.taskName}</p>
+                    <div className="flex items-center gap-4">
+                      <MdDelete
+                        onClick={() => handlePendingDelete(task)}
+                        className="text-red-700 cursor-pointer"
+                      />
+                      <FaArrowRight
+                        onClick={() => handleToRunning(task)}
+                        className="text-blue-700 cursor-pointer"
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <h1 className="text-center">No task yet!</h1>
+              )}
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-md">
@@ -163,42 +164,47 @@ const Dashboard = () => {
               In Progress
             </h2>
             <div className="p-4">
-              {running?.map((task) => (
-                <div
-                  key={task._id}
-                  className="flex items-center justify-between border-b border-gray-300 py-2"
-                >
-                  <p className="text-lg">{task.taskName}</p>
-                  <div className="flex items-center gap-4">
-                    <MdDelete
-                      onClick={() => handleRunningDelete(task)}
-                      className="text-red-700 cursor-pointer"
-                    />
-                    <FaArrowRight
-                      onClick={() => handleToCompleted(task)}
-                      className="text-blue-700 cursor-pointer"
-                    />
+              {running.length ? (
+                running.map((task) => (
+                  <div
+                    key={task._id}
+                    className="flex items-center justify-between border-b border-gray-300 py-2"
+                  >
+                    <p className="text-lg">{task.taskName}</p>
+                    <div className="flex items-center gap-4">
+                      <MdDelete
+                        onClick={() => handleRunningDelete(task)}
+                        className="text-red-700 cursor-pointer"
+                      />
+                      <FaArrowRight
+                        onClick={() => handleToCompleted(task)}
+                        className="text-blue-700 cursor-pointer"
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <h1 className="text-center">No task yet!</h1>
+              )}
             </div>
           </div>
         </div>
       </div>
-      <div className="flex-1 border-l-2 border-solid ml-2 mt-20 min-h-screen">
+      <div className="flex-1 border-l-2 border-solid ml-2 mt-20">
         <div className="pt-5 w-11/12 flex justify-center items-center pb-2 mx-auto gap-3 border-b-2">
           <img src={user.photoURL} className="h-10 w-10 rounded-full" alt="" />
           <div>
-          <h1 className="text-xl font-semibold">{user.displayName}</h1>
-          <p>{user.email}</p>
+            <h1 className="text-xl font-semibold">{user.displayName}</h1>
+            <p>{user.email}</p>
           </div>
         </div>
         <div className="bg-white w-11/12 mx-auto rounded-lg mt-5 pt-5 shadow-md">
-            <h2 className="text-2xl font-bold py-4 border-b border-gray-300 text-center text-primary rounded-t-lg">
-              Done
-            </h2>
-            <div className="">
-              {completed.map((task) => (
+          <h2 className="text-2xl font-bold py-4 border-b border-gray-300 text-center text-primary rounded-t-lg">
+            Completed Tasks
+          </h2>
+          <div className="">
+            {completed.length ? (
+              completed.map((task) => (
                 <div
                   key={task._id}
                   className="flex items-center justify-between border-b border-gray-300 py-3 px-4"
@@ -211,9 +217,12 @@ const Dashboard = () => {
                     />
                   </div>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <h1 className="text-center">No task yet!</h1>
+            )}
           </div>
+        </div>
       </div>
     </div>
   );
