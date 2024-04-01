@@ -13,6 +13,7 @@ import AuthProvider from './components/provider/AuthProvider.jsx';
 import HomePage from './components/pages/home/HomePage.jsx';
 import Dashboard from './components/pages/dashboard/Dashboard.jsx';
 import AddTask from './components/pages/add_task/AddTask.jsx';
+import PrivateRouter from './components/private router/PrivateRouter.jsx';
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
@@ -34,11 +35,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <Dashboard />
+        element: <PrivateRouter><Dashboard /></PrivateRouter>
       },
       {
         path: "/addTask",
-        element: <AddTask />
+        element: <PrivateRouter><AddTask /></PrivateRouter>
       }
     ]
   },
